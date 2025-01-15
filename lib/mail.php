@@ -23,7 +23,7 @@ class ServiceWraithMail extends ServiceWraith {
 		parent::__construct();
 	}
 
-	private function open() {
+	private function open(): void {
 		$this->log(LOG_INFO,'Connecting');
 		$this->imap = @imap_open($this->mailbox, $this->user, $this->password);
 		if($imap_errors = imap_errors()) {
@@ -31,12 +31,13 @@ class ServiceWraithMail extends ServiceWraith {
 		}
 	}
 
-	public function run() {
-		$timestamp = 0;
+	public function run(string $directory = null): void {
+		$this->initial($directory ?? __DIR__);
+
 		$this->open();
 		if($this->imap===false || !imap_is_open($this->imap)) {
 			$this->log(LOG_ERR,'No connection');
-			return false;
+			return;
 		}
 
 		while(true) {
@@ -49,8 +50,9 @@ class ServiceWraithMail extends ServiceWraith {
 				$num_msg = imap_num_msg($this->imap);
 				if($num_msg) {
 					$this->log(LOG_NOTICE,'Found '.$num_msg.' messages');
-					call_user_func($this->function,$this->imap,$num_msg);
+					$continue = call_user_func($this->function,$this->imap,$num_msg) ?? true;
 					imap_expunge($this->imap);
+					if($continue===false) return;
 				}
 				$this->finally();
 			}

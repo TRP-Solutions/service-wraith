@@ -21,9 +21,9 @@ $mainloop = function($imap,$num_msg) {
 
 $custombeat = function($daemon) {
 	echo date('H:i:s').' Heartbeat'.PHP_EOL;
-	$daemon->heartbeat();
+	//$daemon->heartbeat();
 };
 
 $daemon = new ServiceWraithMail($mainloop,'{localhost:143}INBOX', 'user_id', 'password');
 $daemon->set_heartbeat($custombeat,10);
-$daemon->run();
+$daemon->run(__DIR__);

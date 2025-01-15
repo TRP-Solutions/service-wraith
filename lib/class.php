@@ -8,7 +8,7 @@ declare(strict_types=1);
 class ServiceWraith {
 	private $log_prefix = 'ServiceWraith:';
 	private $heartbeat, $timestamp, $interval = 300;
-	protected $sleep, $backoff = 300;
+	protected $directory, $sleep, $backoff = 300;
 
 	function __construct() {
 		if(php_sapi_name()!=='cli') {
@@ -19,18 +19,22 @@ class ServiceWraith {
 		$this->heartbeat = [$this,'heartbeat'];
 	}
 
-	public function set_heartbeat(callable $function,int $interval = null) {
+	public function set_heartbeat(callable $function,int $interval = null): void {
 		$this->heartbeat = $function;
 		if($interval) {
 			$this->interval = $interval;
 		}
 	}
 
-	protected function log(int $priority, string $message) {
+	protected function initial(string $directory): void {
+		$this->directory = $directory;
+	}
+
+	protected function log(int $priority, string $message): void {
 		syslog($priority,$this->log_prefix.$message);
 	}
 
-	protected function finally() {
+	protected function finally(): void {
 		if(time()>=($this->timestamp+$this->interval)) {
 			$this->log(LOG_INFO,'Heartbeat');
 			$this->timestamp = time();
@@ -39,7 +43,7 @@ class ServiceWraith {
 		sleep($this->sleep);
 	}
 
-	public function heartbeat() {
-		file_put_contents(__DIR__.'/timestamp',$this->timestamp);
+	public function heartbeat(): void {
+		file_put_contents($this->directory.'/timestamp',$this->timestamp);
 	}
 }

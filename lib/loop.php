@@ -16,10 +16,10 @@ class ServiceWraithLoop extends ServiceWraith {
 		parent::__construct();
 	}
 
-	public function run(string $directory = null): void {
+	public function run(?string $directory = null): void {
 		$this->initial($directory ?? __DIR__);
 
-		while(true) {
+		while($this->run) {
 			$continue = call_user_func($this->function) ?? true;
 			if($continue===false) return;
 

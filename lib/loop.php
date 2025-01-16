@@ -8,6 +8,7 @@ require_once __DIR__.'/class.php';
 
 class ServiceWraithLoop extends ServiceWraith {
 	private $function;
+	private int $sleep;
 
 	function __construct(callable $function, int $sleep = 60) {
 		$this->function = $function;
@@ -24,6 +25,7 @@ class ServiceWraithLoop extends ServiceWraith {
 			if($continue===false) return;
 
 			$this->finally();
+			if($this->run) sleep($this->sleep);
 		}
 	}
 }

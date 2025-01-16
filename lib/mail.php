@@ -8,7 +8,7 @@ require_once __DIR__.'/class.php';
 
 class ServiceWraithMail extends ServiceWraith {
 	private string $mailbox, $user, $password;
-	private int $flags;
+	private int $flags, $sleep, $backoff = 300;
 	private $function;
 	public $imap;
 
@@ -32,6 +32,11 @@ class ServiceWraithMail extends ServiceWraith {
 		}
 	}
 
+	private function close(): void {
+		$this->log(LOG_INFO,'Closing');
+		imap_close($this->imap);
+	}
+
 	public function run(?string $directory = null): void {
 		$this->initial($directory ?? __DIR__);
 
@@ -53,10 +58,18 @@ class ServiceWraithMail extends ServiceWraith {
 					$this->log(LOG_NOTICE,'Found '.$num_msg.' messages');
 					$continue = call_user_func($this->function,$this->imap,$num_msg) ?? true;
 					imap_expunge($this->imap);
-					if($continue===false) return;
+					if($continue===false) {
+						$this->close();
+						return;
+					};
+					$this->timestamp = 0;
 				}
 				$this->finally();
+				if($this->run) sleep($this->sleep);
 			}
 		}
+
+		$this->close();
+		return;
 	}
 }

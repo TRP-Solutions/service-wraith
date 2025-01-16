@@ -8,9 +8,9 @@ declare(strict_types=1);
 class ServiceWraith {
 	private string $log_prefix = 'ServiceWraith:';
 	private $heartbeat;
-	private int $timestamp = 0, $interval = 300;
+	private int $interval = 300;
 	protected ?string $directory;
-	protected int $sleep, $backoff = 300;
+	protected int $timestamp = 0;
 	protected bool $run = true;
 
 	function __construct() {
@@ -55,7 +55,6 @@ class ServiceWraith {
 			$this->timestamp = time();
 			call_user_func($this->heartbeat,$this);
 		}
-		if(!$this->run) sleep($this->sleep);
 	}
 
 	public function heartbeat(): void {

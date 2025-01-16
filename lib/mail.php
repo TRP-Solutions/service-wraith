@@ -7,7 +7,8 @@ declare(strict_types=1);
 require_once __DIR__.'/class.php';
 
 class ServiceWraithMail extends ServiceWraith {
-	private string $mailbox, string $user, string $password, int $flags;
+	private string $mailbox, $user, $password;
+	private int $flags;
 	private $function;
 	public $imap;
 
@@ -43,7 +44,7 @@ class ServiceWraithMail extends ServiceWraith {
 		while($this->run) {
 			if($this->imap===false || !imap_ping($this->imap)) {
 				$this->log(LOG_ERR,'Ping failed');
-				sleep($this->backoff);
+				if($this->run) sleep($this->backoff);
 				$this->open();
 			}
 			else {

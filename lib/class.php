@@ -34,10 +34,15 @@ class ServiceWraithCore {
 		self::$constructed = true;
 	}
 
-	public static function set_heartbeat(?callable $function,?int $interval = null): void {
-		self::$heartbeat_function = $function;
+	public static function set_heartbeat(?callable $function = null,?int $interval = null): void {
+		if($function) {
+			self::$heartbeat_function = $function;
+		}
 		if($interval) {
 			self::$heartbeat_interval = $interval;
+		}
+		if($function===null && $interval===null) {
+			self::$heartbeat_function = null;
 		}
 	}
 

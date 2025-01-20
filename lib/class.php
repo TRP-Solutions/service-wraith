@@ -6,7 +6,7 @@ https://github.com/TRP-Solutions/service-wraith/blob/master/LICENSE
 declare(strict_types=1);
 
 class ServiceWraithCore {
-	private static string $log_prefix = 'ServiceWraith:';
+	private static string $log_prefix = 'ServiceWraith';
 	private static $heartbeat_function;
 	private static int $heartbeat_interval = 300, $heartbeat_time = 0;
 	private static ?string $directory;
@@ -64,13 +64,13 @@ class ServiceWraithCore {
 		if(self::$constructed!==true) {
 			throw new \Exception('ServiceWraith not constructed');
 		}
-		self::log(LOG_INFO,'Run PID:'.getmypid());
+		self::log(LOG_INFO,'Run');
 		self::$directory = $directory;
 		self::$run = true;
 	}
 
 	protected static function log(int $priority, string $message): void {
-		syslog($priority,self::$log_prefix.$message);
+		syslog($priority,self::$log_prefix.' [pid '.getmypid().'] '.$message);
 	}
 
 	protected static function finally(): void {

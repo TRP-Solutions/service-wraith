@@ -29,7 +29,7 @@ class ServiceWraithMemcached extends ServiceWraith {
 
 	private function close(): void {
 		$this->log(LOG_INFO,'Closing');
-		$this->memcached->close();
+		$this->memcached->quit();
 	}
 
 	public function run(?string $directory = null): void {
@@ -60,14 +60,13 @@ class ServiceWraithMemcached extends ServiceWraith {
 			}
 			if($queue) {
 				$this->log(LOG_NOTICE,'Trigger '.$queue);
-				$continue = call_user_func($this->function) ?? true;
+				$continue = call_user_func($this->function,$this) ?? true;
 				if($continue===false) {
 					$this->close();
 					return;
 				};
 
 				$this->memcached->decrement($this->key,$queue);
-				$this->timestamp = 0;
 			}
 
 			$this->finally();

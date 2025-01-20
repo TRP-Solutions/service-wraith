@@ -62,7 +62,6 @@ class ServiceWraithMail extends ServiceWraith {
 						$this->close();
 						return;
 					};
-					$this->timestamp = 0;
 				}
 				$this->finally();
 				if($this->run) sleep($this->sleep);

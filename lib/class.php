@@ -14,8 +14,13 @@ class ServiceWraithCore {
 	protected static bool $run = false;
 	private static $timer_function = null;
 	private static int $timer_interval, $timer_time = 0;
+	private const NAP = 5;
 
 	protected static function construct() {
+		if(self::$constructed!==false) {
+			throw new \Exception('ServiceWraith already constructed');
+		}
+
 		if(php_sapi_name()!=='cli') {
 			throw new \Exception('ServiceWraith can only run cli');
 		}
@@ -86,6 +91,16 @@ class ServiceWraithCore {
 				call_user_func(self::$heartbeat_function);
 			}
 		}
+	}
+
+	public static function sleep(int $second): int {
+		if(!self::$run) return $second;
+		while($second && self::$run) {
+			$nap = min($second,self::NAP);
+			$elapsed = sleep($nap);
+			$second -= ($nap-$elapsed);
+		}
+		return $second;
 	}
 
 	public static function heartbeat(): void {

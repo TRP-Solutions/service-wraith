@@ -48,7 +48,7 @@ class ServiceWraith extends ServiceWraithCore {
 		while(self::$run) {
 			if(self::$imap===false || !imap_ping(self::$imap)) {
 				self::log(LOG_ERR,'Ping failed');
-				if(self::$run) sleep(self::$backoff);
+				self::sleep(self::$backoff);
 				self::open();
 			}
 			else {
@@ -63,7 +63,7 @@ class ServiceWraith extends ServiceWraithCore {
 					};
 				}
 				self::finally();
-				if(self::$run) sleep(self::$sleep);
+				self::sleep(self::$sleep);
 			}
 		}
 

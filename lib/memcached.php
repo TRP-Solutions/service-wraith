@@ -54,7 +54,7 @@ class ServiceWraith extends ServiceWraithCore {
 			}
 			elseif(!$connected || self::$memcached->getResultCode()!==Memcached::RES_SUCCESS) {
 				self::log(LOG_ERR,self::$memcached->getResultMessage());
-				if(self::$run) sleep(self::$backoff);
+				self::sleep(self::$backoff);
 				$connected = false;
 				continue;
 			}

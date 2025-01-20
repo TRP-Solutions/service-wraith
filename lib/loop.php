@@ -25,7 +25,7 @@ class ServiceWraith extends ServiceWraithCore {
 			if($continue===false) return;
 
 			self::finally();
-			if(self::$run) sleep(self::$sleep);
+			self::sleep(self::$sleep);
 		}
 	}
 }

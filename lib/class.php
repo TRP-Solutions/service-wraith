@@ -5,81 +5,90 @@ https://github.com/TRP-Solutions/service-wraith/blob/master/LICENSE
 */
 declare(strict_types=1);
 
-class ServiceWraith {
-	private string $log_prefix = 'ServiceWraith:';
-	private $heartbeat_function;
-	private int $heartbeat_interval = 300, $heartbeat_time = 0;
-	private ?string $directory;
-	protected bool $run = true;
-	private $timer_function = null;
-	private int $timer_interval = 300, $timer_time = 0;
+class ServiceWraithCore {
+	private static string $log_prefix = 'ServiceWraith:';
+	private static $heartbeat_function;
+	private static int $heartbeat_interval = 300, $heartbeat_time = 0;
+	private static ?string $directory;
+	protected static bool $constructed = false;
+	protected static bool $run = false;
+	private static $timer_function = null;
+	private static int $timer_interval, $timer_time = 0;
 
-	function __construct() {
+	protected static function construct() {
 		if(php_sapi_name()!=='cli') {
 			throw new \Exception('ServiceWraith can only run cli');
 		}
 
 		pcntl_async_signals(true);
 		foreach([SIGTERM, SIGINT, SIGUSR1, SIGUSR2, SIGQUIT, SIGHUP] as $signal) {
-			pcntl_signal($signal, [$this,'terminate']);
+			pcntl_signal($signal, ['ServiceWraith','terminate']);
 		}
 
-		$this->heartbeat_function = [$this,'heartbeat'];
+		self::$heartbeat_function = ['ServiceWraith','heartbeat'];
+		self::$constructed = true;
 	}
 
-	public function set_heartbeat(?callable $function,?int $interval = null): void {
-		$this->heartbeat_function = $function;
+	public static function set_heartbeat(?callable $function,?int $interval = null): void {
+		self::$heartbeat_function = $function;
 		if($interval) {
-			$this->heartbeat_interval = $interval;
+			self::$heartbeat_interval = $interval;
 		}
 	}
 
-	public function set_timer(?callable $function,?int $interval = null): void {
-		$this->timer_function = $function;
-		if($interval) {
-			$this->timer_interval = $interval;
+	public static function set_timer(?callable $function,?int $interval = null): void {
+		if($function && $interval) {
+			self::$timer_function = $function;
+			self::$timer_interval = $interval;
+		}
+		else {
+			self::$timer_function = null;
 		}
 	}
 
-	public function reset_timer(): void {
-		$this->timer_time = time();
+	public static function reset_timer(): void {
+		self::$timer_time = time();
 	}
 
-	public function terminate(): void {
-		$this->log(LOG_INFO,'Terminate');
-		$this->run = false;
+	public static function terminate(): void {
+		self::log(LOG_INFO,'Terminate');
+		self::$run = false;
 	}
 
-	protected function initial(string $directory): void {
-		$this->log(LOG_INFO,'Run PID:'.getmypid());
-		$this->directory = $directory;
+	protected static function initial(string $directory): void {
+		if(self::$constructed!==true) {
+			throw new \Exception('ServiceWraith not constructed');
+		}
+		self::log(LOG_INFO,'Run PID:'.getmypid());
+		self::$directory = $directory;
+		self::$run = true;
 	}
 
-	protected function log(int $priority, string $message): void {
-		syslog($priority,$this->log_prefix.$message);
+	protected static function log(int $priority, string $message): void {
+		syslog($priority,self::$log_prefix.$message);
 	}
 
-	protected function finally(): void {
-		if(!$this->run) return;
+	protected static function finally(): void {
+		if(!self::$run) return;
 
-		if($this->timer_function) {
-			if(time()>=($this->timer_time+$this->timer_interval)) {
-				$this->log(LOG_INFO,'Timer');
-				$this->timer_time = time();
-				call_user_func($this->timer_function,$this);
+		if(self::$timer_function) {
+			if(time()>=(self::$timer_time+self::$timer_interval)) {
+				self::log(LOG_INFO,'Timer');
+				self::$timer_time = time();
+				call_user_func(self::$timer_function);
 			}
 		}
 
-		if($this->heartbeat_function) {
-			if(time()>=($this->heartbeat_time+$this->heartbeat_interval)) {
-				$this->log(LOG_INFO,'Heartbeat');
-				$this->heartbeat_time = time();
-				call_user_func($this->heartbeat_function,$this);
+		if(self::$heartbeat_function) {
+			if(time()>=(self::$heartbeat_time+self::$heartbeat_interval)) {
+				self::log(LOG_INFO,'Heartbeat');
+				self::$heartbeat_time = time();
+				call_user_func(self::$heartbeat_function);
 			}
 		}
 	}
 
-	public function heartbeat(): void {
-		file_put_contents($this->directory.'/timestamp',$this->heartbeat_time);
+	public static function heartbeat(): void {
+		file_put_contents(self::$directory.'/timestamp',self::$heartbeat_time);
 	}
 }

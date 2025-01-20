@@ -19,5 +19,5 @@ $mainloop = function($imap,$num_msg) {
 	//$mysqli->close();
 };
 
-$daemon = new ServiceWraithMail($mainloop,'{localhost:143}INBOX', 'user_id', 'password');
-$daemon->run(__DIR__);
+ServiceWraith::mail($mainloop,'{localhost:143}INBOX', 'user_id', 'password');
+ServiceWraith::run(__DIR__);

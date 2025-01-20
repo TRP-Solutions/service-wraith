@@ -12,8 +12,16 @@ $mainloop = function() {
 
 	echo date('H:i:s').' Poke'.PHP_EOL;
 
+	ServiceWraith::reset_timer();
+
 	//$mysqli->close();
 };
 
-$daemon = new ServiceWraithMemcached($mainloop,'sw');
-$daemon->run(__DIR__);
+$timer = function() {
+	echo date('H:i:s').' Timer'.PHP_EOL;
+};
+
+
+ServiceWraith::memcached($mainloop,'sw');
+ServiceWraith::set_timer($timer,5);
+ServiceWraith::run(__DIR__);

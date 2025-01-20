@@ -6,69 +6,68 @@ https://github.com/TRP-Solutions/service-wraith/blob/master/LICENSE
 declare(strict_types=1);
 require_once __DIR__.'/class.php';
 
-class ServiceWraithMail extends ServiceWraith {
-	private string $mailbox, $user, $password;
-	private int $flags, $sleep, $backoff = 300;
-	private $function;
-	public $imap;
+class ServiceWraith extends ServiceWraithCore {
+	private static string $mailbox, $user, $password;
+	private static int $flags, $sleep, $backoff = 300;
+	private static $function;
+	public static $imap;
 
-	function __construct(callable $function,string $mailbox,string $user,string $password,int $flags = 0) {
-		$this->function = $function;
-		$this->mailbox = $mailbox;
-		$this->user = $user;
-		$this->password = $password;
-		$this->flags = $flags;
+	public static function mail(callable $function,string $mailbox,string $user,string $password,int $flags = 0) {
+		self::$function = $function;
+		self::$mailbox = $mailbox;
+		self::$user = $user;
+		self::$password = $password;
+		self::$flags = $flags;
 
-		$this->sleep = 5;
-
-		parent::__construct();
+		self::$sleep = 5;
+		self::construct();
 	}
 
-	private function open(): void {
-		$this->log(LOG_INFO,'Connecting');
-		$this->imap = @imap_open($this->mailbox, $this->user, $this->password);
+	private static function open(): void {
+		self::log(LOG_INFO,'Connecting');
+		self::$imap = @imap_open(self::$mailbox, self::$user, self::$password);
 		if($imap_errors = imap_errors()) {
-			foreach($imap_errors as $error) $this->log(LOG_ERR,'MailError: '.$error);
+			foreach($imap_errors as $error) self::log(LOG_ERR,'MailError: '.$error);
 		}
 	}
 
-	private function close(): void {
-		$this->log(LOG_INFO,'Closing');
-		imap_close($this->imap);
+	private static function close(): void {
+		self::log(LOG_INFO,'Closing');
+		imap_close(self::$imap);
 	}
 
-	public function run(?string $directory = null): void {
-		$this->initial($directory ?? __DIR__);
+	public static function run(?string $directory = null): void {
+		self::initial($directory ?? __DIR__);
 
-		$this->open();
-		if($this->imap===false || !imap_is_open($this->imap)) {
-			$this->log(LOG_ERR,'No connection');
+		self::open();
+		if(self::$imap===false || !imap_is_open(self::$imap)) {
+			self::log(LOG_ERR,'No connection');
 			return;
 		}
 
-		while($this->run) {
-			if($this->imap===false || !imap_ping($this->imap)) {
-				$this->log(LOG_ERR,'Ping failed');
-				if($this->run) sleep($this->backoff);
-				$this->open();
+		while(self::$run) {
+			if(self::$imap===false || !imap_ping(self::$imap)) {
+				self::log(LOG_ERR,'Ping failed');
+				if(self::$run) sleep(self::$backoff);
+				self::open();
 			}
 			else {
-				$num_msg = imap_num_msg($this->imap);
+				$num_msg = imap_num_msg(self::$imap);
 				if($num_msg) {
-					$this->log(LOG_NOTICE,'Found '.$num_msg.' messages');
-					$continue = call_user_func($this->function,$this->imap,$num_msg) ?? true;
-					imap_expunge($this->imap);
+					self::log(LOG_NOTICE,'Found '.$num_msg.' messages');
+					$continue = call_user_func(self::$function,self::$imap,$num_msg) ?? true;
+					imap_expunge(self::$imap);
 					if($continue===false) {
-						$this->close();
+						self::close();
 						return;
 					};
 				}
-				$this->finally();
-				if($this->run) sleep($this->sleep);
+				self::finally();
+				if(self::$run) sleep(self::$sleep);
 			}
 		}
 
-		$this->close();
+		self::close();
 		return;
 	}
 }

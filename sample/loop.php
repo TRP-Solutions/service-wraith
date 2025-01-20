@@ -10,11 +10,16 @@ $mainloop = function() {
 	echo date('H:i:s').' Process'.PHP_EOL;
 };
 
-$custombeat = function($daemon) {
+$custombeat = function() {
 	echo date('H:i:s').' Heartbeat'.PHP_EOL;
-	//$daemon->heartbeat();
+	ServiceWraith::heartbeat();
 };
 
-$daemon = new ServiceWraithLoop($mainloop,10);
-$daemon->set_heartbeat($custombeat,30);
-$daemon->run(__DIR__);
+$timer = function() {
+	echo date('H:i:s').' Timer'.PHP_EOL;
+};
+
+ServiceWraith::loop($mainloop,2);
+ServiceWraith::set_heartbeat($custombeat,30);
+ServiceWraith::set_timer($timer,10);
+ServiceWraith::run(__DIR__);

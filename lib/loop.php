@@ -6,26 +6,26 @@ https://github.com/TRP-Solutions/service-wraith/blob/master/LICENSE
 declare(strict_types=1);
 require_once __DIR__.'/class.php';
 
-class ServiceWraithLoop extends ServiceWraith {
-	private $function;
-	private int $sleep;
+class ServiceWraith extends ServiceWraithCore {
+	private static $function;
+	private static int $sleep;
 
-	function __construct(callable $function, int $sleep = 60) {
-		$this->function = $function;
-		$this->sleep = $sleep;
+	public static function loop(callable $function, int $sleep = 60) {
+		self::$function = $function;
+		self::$sleep = $sleep;
 
-		parent::__construct();
+		self::construct();
 	}
 
-	public function run(?string $directory = null): void {
-		$this->initial($directory ?? __DIR__);
+	public static function run(?string $directory = null): void {
+		self::initial($directory ?? __DIR__);
 
-		while($this->run) {
-			$continue = call_user_func($this->function) ?? true;
+		while(self::$run) {
+			$continue = call_user_func(self::$function) ?? true;
 			if($continue===false) return;
 
-			$this->finally();
-			if($this->run) sleep($this->sleep);
+			self::finally();
+			if(self::$run) sleep(self::$sleep);
 		}
 	}
 }

@@ -26,14 +26,18 @@ class ServiceWraith extends ServiceWraithCore {
 	private static function open(): void {
 		self::log(LOG_INFO,'Connecting');
 		self::$imap = @imap_open(self::$mailbox, self::$user, self::$password);
-		if($imap_errors = imap_errors()) {
-			foreach($imap_errors as $error) self::log(LOG_ERR,'MailError: '.$error);
-		}
+		self::errors();
 	}
 
 	private static function close(): void {
 		self::log(LOG_INFO,'Closing');
 		imap_close(self::$imap);
+	}
+
+	private static function errors(): void {
+		if($imap_errors = imap_errors()) {
+			foreach($imap_errors as $error) self::log(LOG_ERR,'MailError: '.$error);
+		}
 	}
 
 	public static function run(?string $directory = null): void {
@@ -57,6 +61,7 @@ class ServiceWraith extends ServiceWraithCore {
 					self::log(LOG_NOTICE,'Found '.$num_msg.' messages');
 					$continue = call_user_func(self::$function,self::$imap,$num_msg) ?? true;
 					imap_expunge(self::$imap);
+					self::errors();
 					if($continue===false) {
 						self::close();
 						return;

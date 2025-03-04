@@ -85,7 +85,11 @@ class ServiceWraithCore {
 			if(time()>=(self::$timer_time+self::$timer_interval)) {
 				self::log(LOG_INFO,'Timer');
 				self::$timer_time = time();
-				call_user_func(self::$timer_function);
+				$continue = call_user_func(self::$timer_function) ?? true;
+				if($continue===false) {
+					self::terminate();
+					return;
+				};
 			}
 		}
 

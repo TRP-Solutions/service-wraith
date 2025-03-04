@@ -63,8 +63,7 @@ class ServiceWraith extends ServiceWraithCore {
 					imap_expunge(self::$imap);
 					self::errors();
 					if($continue===false) {
-						self::close();
-						return;
+						self::terminate();
 					};
 				}
 				self::finally();

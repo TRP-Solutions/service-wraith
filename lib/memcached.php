@@ -62,8 +62,7 @@ class ServiceWraith extends ServiceWraithCore {
 				self::log(LOG_NOTICE,'Trigger '.$queue);
 				$continue = call_user_func(self::$function) ?? true;
 				if($continue===false) {
-					self::close();
-					return;
+					self::terminate();
 				};
 
 				self::$memcached->decrement(self::$key,$queue);

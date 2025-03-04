@@ -22,7 +22,9 @@ class ServiceWraith extends ServiceWraithCore {
 
 		while(self::$run) {
 			$continue = call_user_func(self::$function) ?? true;
-			if($continue===false) return;
+			if($continue===false) {
+				self::terminate();
+			}
 
 			self::finally();
 

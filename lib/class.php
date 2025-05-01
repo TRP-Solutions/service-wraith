@@ -102,14 +102,14 @@ class ServiceWraithCore {
 		}
 	}
 
-	public static function sleep(int $second): int {
-		if(!self::$run) return $second;
+	public static function sleep(int|false $second): int {
+		if(!self::$run) return intval($second);
 		while($second && self::$run) {
 			$nap = min($second,self::NAP);
 			$elapsed = sleep($nap);
 			$second -= ($nap-$elapsed);
 		}
-		return $second;
+		return intval($second);
 	}
 
 	public static function heartbeat(): void {

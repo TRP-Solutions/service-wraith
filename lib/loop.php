@@ -8,9 +8,9 @@ require_once __DIR__.'/class.php';
 
 class ServiceWraith extends ServiceWraithCore {
 	private static $function;
-	private static int $sleep;
+	private static int|false $sleep;
 
-	public static function loop(callable $function, int $sleep = 60) {
+	public static function loop(callable $function, int|false $sleep = 60) {
 		self::$function = $function;
 		self::$sleep = $sleep;
 
@@ -28,7 +28,9 @@ class ServiceWraith extends ServiceWraithCore {
 
 			self::finally();
 
-			if(!self::$sleep) return;
+			if(self::$sleep===false) {
+				self::terminate();
+			}
 			self::sleep(self::$sleep);
 		}
 	}

@@ -102,8 +102,9 @@ class ServiceWraithCore {
 		}
 	}
 
-	public static function sleep(int|false $second): int {
+	public static function sleep(int|false $second, bool $suspend = true): int {
 		if(!self::$run) return intval($second);
+		if($second && $suspend) self::log(LOG_INFO,'Suspend: '.$second.'s');
 		while($second && self::$run) {
 			$nap = min($second,self::NAP);
 			$elapsed = sleep($nap);

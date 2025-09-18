@@ -67,7 +67,7 @@ class ServiceWraith extends ServiceWraithCore {
 					};
 				}
 				self::finally();
-				self::sleep(self::$sleep);
+				self::sleep(self::$sleep, false);
 			}
 		}
 

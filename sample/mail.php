@@ -1,6 +1,6 @@
 <?php
 /*
-FancyFilter is licensed under the Apache License 2.0 license
+ServiceWraith is licensed under the Apache License 2.0 license
 https://github.com/TRP-Solutions/service-wraith/blob/master/LICENSE
 */
 declare(strict_types=1);
